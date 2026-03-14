@@ -1,0 +1,13 @@
+{
+  "modID": "industrytesting",
+  "name": "Industry",
+  "version": "1.0.1",
+  "author": "tomster12",
+  "fluxloaderVersion": "^2.5.3",
+  "shortDescription": "Industrial machines and processes.",
+  "description": "Industrial machines and processes.",
+  "dependencies": { "corelib": "^3.0.0" },
+  "tags": [],
+  "electronEntrypoint": "entry.electron.js",
+  "gameEntrypoint": "entry.game.js"
+}
