@@ -10,18 +10,19 @@ function tickTimer(obj, name, dt, duration) {
 	return false;
 }
 
-function isRangeBlocked(px, py, sx, sy) {
-	for (let x = 0; x < sx; x++) {
-		for (let y = 0; y < sy; y++) {
-			if (!corelib.exposed.raw.tf(fluxloaderAPI.gameInstance.state, px + x, py + y)) return;
-		}
-	}
-}
-
 function getCellElement(x, y) {
 	let id = corelib.exposed.raw.rf(fluxloaderAPI.gameInstance.state, x, y);
 	if (id == null) return null;
 	return corelib.utils.getParticleNameFromNumber(id);
+}
+
+function isRangeFullyBlocked(px, py, sx, sy) {
+	for (let x = 0; x < sx; x++) {
+		for (let y = 0; y < sy; y++) {
+			if (corelib.exposed.raw.tf(fluxloaderAPI.gameInstance.state, px + x, py + y)) return false;
+		}
+	}
+	return true;
 }
 
 function isRangeFullOfSingleElement(px, py, sx, sy) {
@@ -44,25 +45,22 @@ fluxloaderAPI.events.on("corelib:block-compressor", (block) => {
 	const ticksPerSecond = 1000 / tickInterval;
 	const dt = 1 / ticksPerSecond;
 
-	// Do not continue if we are blocked
-	if (isRangeBlocked(block.x - 2, block.y, 2, 4)) return;
+	const mapping = {
+		"Sand": "CompressedSand",
+		"InfusedSand": "CompressedGloom"
+	};
+
+	// Do not continue if we are fully blocked
+	if (isRangeFullyBlocked(block.x - 1, block.y, 1, 4)) return;
 
 	// Do not continue if we dont have fuel
 	if (getCellElement(block.x + 1, block.y) != "Gloom") return;
 
-	// Produce smog to show it is ready, and to cause issues for the user
-	let smogChance = 0.05 / (8 * ticksPerSecond);
-	for (let x = 0; x < 2; x++) {
-		for (let y = 0; y < 4; y++) {
-			if (Math.random() < smogChance) {
-				corelib.simulation.spawnElement({ x: block.x - 1 - x, y: block.y + y, id: "Smog" });
-			}
-		}
-	}
-
-	// Check the input area has a single congruent element
+	// Ensure there is an input element that we can process
 	const inputEl = isRangeFullOfSingleElement(block.x + 4, block.y, 4, 4);
 	if (inputEl == null) return;
+	if (!Object.hasOwn(mapping, inputEl)) return;
+	const outputEl = mapping[inputEl];
 
 	if (tickTimer(block, "compressionTimer", dt, 2)) {
 		// Delete input, delete fuel, produce smog, produce output
@@ -77,7 +75,7 @@ fluxloaderAPI.events.on("corelib:block-compressor", (block) => {
 				corelib.simulation.spawnElement({ x: block.x - 1, y: block.y + y, id: "Smog" });
 			}
 		}
-		corelib.simulation.spawnParticle({ x: block.x + 1, y: block.y + 4, id: "CompressedSand" });
+		corelib.simulation.spawnElement({ x: block.x + 1, y: block.y + 4, id: outputEl });
 	}
 });
 
@@ -90,7 +88,7 @@ fluxloaderAPI.events.on("corelib:block-sublimator", (block) => {
 	const mapping = { "Sand": "GaseousSand" };
 
 	// Arbitrary amount we want to offgas each second
-	let offgasPerTick = 25 / ticksPerSecond;
+	let offgasPerTick = 30 / ticksPerSecond;
 
 	if (Object.keys(block.sublimatorStorage).length > 0) {
 		// Handle offgassing, considering multiple elements and >1 produced per tick
@@ -119,7 +117,7 @@ fluxloaderAPI.events.on("corelib:block-sublimator", (block) => {
 	}
 
 	// Do not continue if we are blocked
-	if (isRangeBlocked(block.x, block.y - 1, 4, 1)) return;
+	if (isRangeFullyBlocked(block.x, block.y - 5, 4, 4)) return;
 
 	// Do not continue if we dont have fuel
 	if (getCellElement(block.x, block.y + 1) != "Lava") return;
@@ -135,8 +133,8 @@ fluxloaderAPI.events.on("corelib:block-sublimator", (block) => {
 	const smogInputEl = isRangeFullOfSingleElement(block.x + 1, block.y + 3, 2, 1);
 	if (smogInputEl != "Smog") return;
 
-	// Every 1s consume lava, smog, input, and store output
-	if (tickTimer(block, "sublimationTimer", dt, 1)) {
+	// Every 2s consume lava, smog, input, and store output
+	if (tickTimer(block, "sublimationTimer", dt, 2)) {
 		corelib.simulation.setCell(block.x, block.y + 1, 0);
 		corelib.simulation.setCell(block.x + 3, block.y + 1, 0);
 		for (let x = 0; x < 2; x++) {
@@ -144,7 +142,7 @@ fluxloaderAPI.events.on("corelib:block-sublimator", (block) => {
 		}
 
 		if (!Object.hasOwn(block.sublimatorStorage, outputEl)) block.sublimatorStorage[outputEl] = 0;
-		block.sublimatorStorage[outputEl] += 6;
+		block.sublimatorStorage[outputEl] += 8;
 	}
 });
 
@@ -156,10 +154,12 @@ fluxloaderAPI.events.on("corelib:block-decompressor", (block) => {
 
 	const mapping = {
 		"CompressedSand": "Sand",
+		"CompressedWetSand": "WetSand",
 		"CompressedGold": "Gold",
 		"CompressedSlag": "Slag",
 		"CompressedSpore": "Spore",
 		"CompressedWetSpore": "WetSpore",
+		"CompressedGloom": "Gloom"
 	};
 
 	const slots = [

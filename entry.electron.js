@@ -9,7 +9,7 @@ corelib.elements.registerElement({
 		[116, 101, 73, 255], // rgb(116, 101, 73)
 	],
 	density: 200,
-	interactsWithHoverText: ["☁️"],
+	interactsWithHoverText: ["☁️", "⏫ (Decompressor)"],
 	matterType: "Slushy"
 });
 
@@ -21,8 +21,8 @@ corelib.elements.registerElement({
 		[190, 150, 100, 180], // rgb(190, 150, 100)
 		[173, 133, 83, 180], // rgb(173, 133, 83)
 	],
-	density: 20,
-	interactsWithHoverText: ["🚫"],
+	density: 10,
+	interactsWithHoverText: ["🌸 (Amethelis)"],
 	matterType: "Gas",
 	addToFilterList: false,
 });
@@ -36,8 +36,8 @@ corelib.elements.registerElement({
 		[34, 34, 33, 150], // rgb(34, 34, 33)
 		[35, 35, 35, 150], // rgb(35, 35, 35)
 	],
-	density: 30,
-	interactsWithHoverText: ["💧"],
+	density: 20,
+	interactsWithHoverText: ["🪟 (Sublimator)"],
 	matterType: "Gas",
 	addToFilterList: false,
 });
@@ -51,7 +51,7 @@ corelib.elements.registerElement({
 		[64, 60, 43, 255], // rgb(64, 60, 43)
 	],
 	density: 200,
-	interactsWithHoverText: ["↔️"],
+	interactsWithHoverText: ["↔️", "⏫ (Decompressor)"],
 	matterType: "Slushy"
 });
 
@@ -64,7 +64,7 @@ corelib.elements.registerElement({
 		[244, 239, 186, 255], // rgb(244, 239, 186)
 	],
 	density: 350,
-	interactsWithHoverText: ["🚫"],
+	interactsWithHoverText: ["⏫ (Decompressor)"],
 	matterType: "Solid"
 });
 
@@ -78,7 +78,7 @@ corelib.elements.registerElement({
 		[152, 215, 255, 255], // rgb(152, 215, 255)
 	],
 	density: 150,
-	interactsWithHoverText: ["🌋"],
+	interactsWithHoverText: ["🌋", "⏫ (Decompressor)"],
 	matterType: "Solid"
 });
 
@@ -103,8 +103,8 @@ corelib.elements.registerElement({
 		[138, 235, 118, 255], // rgb(138, 235, 118)
 		[133, 239, 112, 255], // rgb(133, 239, 112)
 	],
-	density: 200,
-	interactsWithHoverText: ["💧"],
+	density: 50,
+	interactsWithHoverText: ["💧", "⏫ (Decompressor)"],
 	matterType: "Solid"
 });
 
@@ -116,16 +116,42 @@ corelib.elements.registerElement({
 		[74, 121, 65, 255], // rgb(74, 121, 65)
 		[66, 104, 59, 255], // rgb(76, 116, 69)
 	],
-	density: 250,
-	interactsWithHoverText: ["🚫"],
+	density: 75,
+	interactsWithHoverText: ["⏫ (Decompressor)"],
 	matterType: "Solid"
+});
+
+corelib.elements.registerElement({
+	id: "InfusedSand",
+	name: "Infused Sand",
+	colors: [
+		[236, 216, 189, 220], // rgb(236, 216, 189)
+		[221, 184, 234, 220], // rgb(221, 184, 234)
+		[215, 192, 225, 220], // rgb(215, 192, 225)
+	],
+	density: 30,
+	interactsWithHoverText: ["⏬ (Compressor)"],
+	matterType: "Wisp"
+});
+
+corelib.elements.registerElement({
+	id: "CompressedGloom",
+	name: "Compressed Void Bloom",
+	colors: [
+		[26, 13, 36, 220], // rgb(26, 13, 36)
+		[33, 15, 46, 220], // rgb(33, 15, 46)
+		[35, 19, 47, 220], // rgb(35, 19, 47)
+	],
+	density: 40,
+	interactsWithHoverText: ["⏫ (Decompressor)"],
+	matterType: "Slushy"
 });
 
 corelib.blocks.register({
 	sourceMod: "industrytesting",
 	id: "compressor",
 	name: "Compressor",
-	description: "Compresses sand to a superdense form, requires a powerful fuel.",
+	description: "Compresses sand to a but requires a powerful fuel.",
 	imagePath: "assets/compressor",
 	shape: [
 		[3, 0, 0, 3],
@@ -144,7 +170,7 @@ corelib.blocks.register({
 	sourceMod: "industrytesting",
 	id: "sublimator",
 	name: "Sublimator",
-	description: "Sublimates sand into a gaseous state using intense heat and industrial pressure.",
+	description: "Sublimates sand into a gas with intense heat and industrial pressure.",
 	imagePath: "assets/sublimator",
 	shape: [
 		[3, 3, 3, 3],
@@ -163,7 +189,7 @@ corelib.blocks.register({
 	sourceMod: "industrytesting",
 	id: "decompressor",
 	name: "Decompressor",
-	description: "Unbinds inter molecular bonds to allow materials back to their base state.",
+	description: "Slowly decompresses most materials.",
 	imagePath: "assets/decompressor",
 	shape: [
 		[3, 3, 3, 3],
@@ -189,7 +215,7 @@ corelib.recipes.registerShakerRecipe({
 	outputBelow: [
 		["CompressedGold", 0.25],
 		["Gold", 1.0],
-		["Gloom", 0.1]
+		["Gloom", 0.2]
 	],
 });
 
@@ -215,7 +241,7 @@ corelib.recipes.registerPressRecipe({
 		["Lava", 1],
 		["CompressedSpore", 1],
 		["CompressedGold", 1],
-		["Gloom", 0.1]
+		["Gloom", 0.2]
 	],
 });
 
@@ -227,24 +253,31 @@ corelib.recipes.registerBasicRecipe({
 	bothWays: true
 });
 
-corelib.recipes.registerPressRecipe({
-	input: "CompressedGold",
-	outputs: [
-		["Gold", 1],
-		["Gold", 1],
-		["Gold", 1],
-		["Gold", 1],
-		["Gold", 1],
-		["Gold", 1],
-		["Gold", 1],
-		["Gold", 1],
-		["Gold", 1],
-		["Gold", 1],
-		["Gold", 1],
-		["Gold", 1],
-		["Gold", 1],
-		["Gold", 1],
-		["Gold", 1],
-		["Gold", 1],
-	],
+corelib.recipes.registerBasicRecipe({
+	inputTop: "Petalium",
+	inputBottom: "GaseousSand",
+	outputTop: "InfusedSand",
+	outputBottom: "InfusedSand",
+	bothWays: true
+});
+
+fluxloaderAPI.setPatch("js/bundle.js", "industrytesting:interactions-1", {
+	type: "replace",
+	from: `name:"Sand",interactions:["💧"`,
+	to: `~,"⏬ (Compressor)","🪟 (Sublimator)"`,
+	token: "~"
+});
+
+fluxloaderAPI.setPatch("js/bundle.js", "industrytesting:interactions-2", {
+	type: "replace",
+	from: `name:"Amethelis",interactions:["🌄 (Redsand)"`,
+	to: `~,"🧋 (Gaseous Sand)"`,
+	token: "~"
+});
+
+fluxloaderAPI.setPatch("js/bundle.js", "industrytesting:interactions-3", {
+	type: "replace",
+	from: `name:"Voidbloom",interactions:["🔮 (Flux Emanator)"`,
+	to: `~,"⏬ (Compressor)"`,
+	token: "~"
 });
