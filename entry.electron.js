@@ -281,3 +281,21 @@ fluxloaderAPI.setPatch("js/bundle.js", "industrytesting:interactions-3", {
 	to: `~,"⏬ (Compressor)"`,
 	token: "~"
 });
+
+corelib.tech.register({
+	id: "AdvancedRefining1",
+	name: "Advanced Refining 1",
+	description: "Unlocks compressor and decompressors.",
+	parent: "Refining5",
+	cost: 15e3,
+	unlocks: { structures: [ "d.compressor", "d.decompressor" ] }
+});
+
+corelib.tech.register({
+	id: "AdvancedRefining2",
+	name: "Advanced Refining 2",
+	description: "Unlocks sublimator.",
+	parent: "AdvancedRefining1",
+	cost: 20e3,
+	unlocks: { structures: [ "d.sublimator" ] }
+});

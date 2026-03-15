@@ -214,7 +214,37 @@ fluxloaderAPI.events.on("corelib:block-decompressor", (block) => {
 			// Consume input and store
 			corelib.simulation.setCell(block.x + dx, block.y - 1, 0);
 			if (!Object.hasOwn(block.decompressorStorage, outputEl)) block.decompressorStorage[outputEl] = 0;
-			block.decompressorStorage[outputEl] += 16;
+
+			if (inputEl == "CompressedGloom") block.decompressorStorage[outputEl] += 8;
+			else block.decompressorStorage[outputEl] += 16;
 		}
 	}
+});
+
+// Manage tech and inventory
+function ensureBuildingUnlocked(shouldHave, buildings) {
+	const buildingIds = buildings.map(b => corelib.utils.getBlockNameFromNumber(b));
+
+	if (!shouldHave) {
+		console.log(fluxloaderAPI.gameInstance.state.store.player.buildings);
+		fluxloaderAPI.gameInstance.state.store.player.buildings =
+			fluxloaderAPI.gameInstance.state.store.player.buildings.filter(b => !buildingIds.includes(b));
+	}
+	if (shouldHave) {
+		for (const id in buildingIds) {
+			if (!buildings.includes(id)) buildings.push(id);
+		}
+	}
+}
+
+fluxloaderAPI.events.on("fl:scene-loaded", (scene) => {
+	if (scene == "mainmenu") return;
+
+	console.log(`Scene: ${scene}`);
+
+	const unlocked1 = Object.hasOwn(fluxloaderAPI.gameInstance.state.store.player.tech, "AdvancedRefining1");
+	const unlocked2 = Object.hasOwn(fluxloaderAPI.gameInstance.state.store.player.tech, "AdvancedRefining2");
+
+	ensureBuildingUnlocked(unlocked1, ["compressor", "decompressor"]);
+	ensureBuildingUnlocked(unlocked2, ["sublimator"]);
 });
