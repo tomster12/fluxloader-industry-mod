@@ -226,13 +226,14 @@ function ensureBuildingUnlocked(shouldHave, buildings) {
 	const buildingIds = buildings.map(b => corelib.utils.getBlockNameFromNumber(b));
 
 	if (!shouldHave) {
-		console.log(fluxloaderAPI.gameInstance.state.store.player.buildings);
 		fluxloaderAPI.gameInstance.state.store.player.buildings =
 			fluxloaderAPI.gameInstance.state.store.player.buildings.filter(b => !buildingIds.includes(b));
 	}
-	if (shouldHave) {
-		for (const id in buildingIds) {
-			if (!buildings.includes(id)) buildings.push(id);
+	else {
+		for (const id of buildingIds) {
+			if (!fluxloaderAPI.gameInstance.state.store.player.buildings.includes(id)) {
+				fluxloaderAPI.gameInstance.state.store.player.buildings.push(id);
+			}
 		}
 	}
 }
@@ -240,10 +241,8 @@ function ensureBuildingUnlocked(shouldHave, buildings) {
 fluxloaderAPI.events.on("fl:scene-loaded", (scene) => {
 	if (scene == "mainmenu") return;
 
-	console.log(`Scene: ${scene}`);
-
-	const unlocked1 = Object.hasOwn(fluxloaderAPI.gameInstance.state.store.player.tech, "AdvancedRefining1");
-	const unlocked2 = Object.hasOwn(fluxloaderAPI.gameInstance.state.store.player.tech, "AdvancedRefining2");
+	const unlocked1 = Object.hasOwn(fluxloaderAPI.gameInstance.state.store.player.tech, corelib.exposed.raw.w["AdvancedRefining1"]);
+	const unlocked2 = Object.hasOwn(fluxloaderAPI.gameInstance.state.store.player.tech, corelib.exposed.raw.w["AdvancedRefining2"]);
 
 	ensureBuildingUnlocked(unlocked1, ["compressor", "decompressor"]);
 	ensureBuildingUnlocked(unlocked2, ["sublimator"]);

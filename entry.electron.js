@@ -151,7 +151,7 @@ corelib.blocks.register({
 	sourceMod: "industrytesting",
 	id: "compressor",
 	name: "Compressor",
-	description: "Compresses sand to a but requires a powerful fuel.",
+	description: "Super compresses sand, but requires a powerful fuel.",
 	imagePath: "assets/compressor",
 	shape: [
 		[3, 0, 0, 3],
@@ -285,17 +285,17 @@ fluxloaderAPI.setPatch("js/bundle.js", "industrytesting:interactions-3", {
 corelib.tech.register({
 	id: "AdvancedRefining1",
 	name: "Advanced Refining 1",
-	description: "Unlocks compressor and decompressors.",
-	parent: "Refining5",
-	cost: 15e3,
+	description: "Unlocks the Compressor and Decompressor.",
+	parent: "Refining4",
+	cost: 10e3,
 	unlocks: { structures: [ "d.compressor", "d.decompressor" ] }
 });
 
 corelib.tech.register({
 	id: "AdvancedRefining2",
 	name: "Advanced Refining 2",
-	description: "Unlocks sublimator.",
+	description: "Unlocks the Sublimator.",
 	parent: "AdvancedRefining1",
-	cost: 20e3,
+	cost: 15e3,
 	unlocks: { structures: [ "d.sublimator" ] }
 });
