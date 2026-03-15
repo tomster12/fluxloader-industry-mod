@@ -24,7 +24,7 @@ function getCellElement(x, y) {
 	return corelib.utils.getParticleNameFromNumber(id);
 }
 
-function checkAndGetRangeCongruentElement(px, py, sx, sy) {
+function isRangeFullOfSingleElement(px, py, sx, sy) {
 	// If every cell in a range is 1 type of element then return that
 	// Otherwise return null (empty or mismatch)
 	let foundId = null;
@@ -51,7 +51,7 @@ fluxloaderAPI.events.on("corelib:block-compressor", (block) => {
 	if (getCellElement(block.x + 1, block.y) != "Gloom") return;
 
 	// Produce smog to show it is ready, and to cause issues for the user
-	let smogChance = 0.2 / (8 * ticksPerSecond);
+	let smogChance = 0.05 / (8 * ticksPerSecond);
 	for (let x = 0; x < 2; x++) {
 		for (let y = 0; y < 4; y++) {
 			if (Math.random() < smogChance) {
@@ -61,7 +61,7 @@ fluxloaderAPI.events.on("corelib:block-compressor", (block) => {
 	}
 
 	// Check the input area has a single congruent element
-	const inputEl = checkAndGetRangeCongruentElement(block.x + 4, block.y, 4, 4);
+	const inputEl = isRangeFullOfSingleElement(block.x + 4, block.y, 4, 4);
 	if (inputEl == null) return;
 
 	if (tickTimer(block, "compressionTimer", dt, 2)) {
@@ -86,6 +86,8 @@ fluxloaderAPI.events.on("corelib:block-sublimator", (block) => {
 	const tickInterval = 100;
 	const ticksPerSecond = 1000 / tickInterval;
 	const dt = 1.0 / ticksPerSecond;
+
+	const mapping = { "Sand": "GaseousSand" };
 
 	// Arbitrary amount we want to offgas each second
 	let offgasPerTick = 25 / ticksPerSecond;
@@ -122,23 +124,97 @@ fluxloaderAPI.events.on("corelib:block-sublimator", (block) => {
 	// Do not continue if we dont have fuel
 	if (getCellElement(block.x, block.y + 1) != "Lava") return;
 
-	// Ensure there is an input element
+	// Ensure there is an input element that we can process, and we have space
 	const inputEl = getCellElement(block.x + 3, block.y + 1);
 	if (inputEl == null) return;
+	if (!Object.hasOwn(mapping, inputEl)) return;
+	const outputEl = mapping[inputEl];
+	if (block.sublimatorStorage[outputEl] > 44) return;
 
-	// Check the steam input is full
-	const steamInputEl = checkAndGetRangeCongruentElement(block.x + 1, block.y + 3, 2, 1);
-	if (steamInputEl != "Steam") return;
+	// Check the smog input is full
+	const smogInputEl = isRangeFullOfSingleElement(block.x + 1, block.y + 3, 2, 1);
+	if (smogInputEl != "Smog") return;
 
-	// Every 1s consume lava, steam, input, and store output
+	// Every 1s consume lava, smog, input, and store output
 	if (tickTimer(block, "sublimationTimer", dt, 1)) {
 		corelib.simulation.setCell(block.x, block.y + 1, 0);
 		corelib.simulation.setCell(block.x + 3, block.y + 1, 0);
 		for (let x = 0; x < 2; x++) {
 			corelib.simulation.setCell(block.x + 1 + x, block.y + 3, 0);
 		}
-		const outputEl = "GaseousSand";
+
 		if (!Object.hasOwn(block.sublimatorStorage, outputEl)) block.sublimatorStorage[outputEl] = 0;
 		block.sublimatorStorage[outputEl] += 6;
+	}
+});
+
+fluxloaderAPI.events.on("corelib:block-decompressor", (block) => {
+	if (block.decompressorStorage == null) block.decompressorStorage = {};
+	const tickInterval = 100;
+	const ticksPerSecond = 1000 / tickInterval;
+	const dt = 1.0 / ticksPerSecond;
+
+	const mapping = {
+		"CompressedSand": "Sand",
+		"CompressedGold": "Gold",
+		"CompressedSlag": "Slag",
+		"CompressedSpore": "Spore",
+		"CompressedWetSpore": "WetSpore",
+	};
+
+	const slots = [
+		{ x: block.x + 0, y: block.y + 1 },
+		{ x: block.x + 0, y: block.y + 2 },
+		{ x: block.x + 0, y: block.y + 3 },
+		{ x: block.x + 1, y: block.y + 3 },
+		{ x: block.x + 2, y: block.y + 3 },
+		{ x: block.x + 3, y: block.y + 3 },
+		{ x: block.x + 3, y: block.y + 2 },
+		{ x: block.x + 3, y: block.y + 1 }
+	]
+
+	// Arbitrary amount we want to output each second
+	let outputPerTick = 5 / ticksPerSecond;
+
+	if (Object.keys(block.decompressorStorage).length > 0) {
+		// Handle outputting, considering multiple elements and >1 produced per tick
+		// We want to keep going if we have luck and there is stuff to spawn
+		let anyLeft = true;
+		let outputLuck = outputPerTick;
+		while (outputLuck > 0 && anyLeft) {
+			anyLeft = false;
+			for (let key in block.decompressorStorage) {
+				if (block.decompressorStorage[key] > 0) {
+					// Consume the luck to try and spawn a particle
+					const r = Math.random();
+					outputLuck -= r;
+					if (outputLuck > 0) {
+						const slot = slots[Math.floor(Math.random() * slots.length)];
+						if (corelib.exposed.raw.tf(fluxloaderAPI.gameInstance.state, slot.x, slot.y)) {
+							block.decompressorStorage[key] -= 1;
+							corelib.simulation.spawnElement({ x: slot.x, y: slot.y, id: key });
+						}
+					}
+					anyLeft ||= block.decompressorStorage[key] > 0;
+				}
+			}
+		}
+	}
+
+	// Every 1s try and consume each input slot
+	if (tickTimer(block, "decompressTimer", dt, 1)) {
+		for (let dx = 0; dx < 4; dx++) {
+			// Ensure there is an input element that we can process, and we have space
+			const inputEl = getCellElement(block.x + dx, block.y - 1);
+			if (inputEl == null) continue;
+			if (!Object.hasOwn(mapping, inputEl)) continue;
+			const outputEl = mapping[inputEl];
+			if (block.decompressorStorage[outputEl] > 34) continue;
+
+			// Consume input and store
+			corelib.simulation.setCell(block.x + dx, block.y - 1, 0);
+			if (!Object.hasOwn(block.decompressorStorage, outputEl)) block.decompressorStorage[outputEl] = 0;
+			block.decompressorStorage[outputEl] += 16;
+		}
 	}
 });

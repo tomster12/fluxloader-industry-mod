@@ -4,12 +4,12 @@ corelib.elements.registerElement({
 	id: "CompressedSand",
 	name: "Compressed Sand",
 	colors: [
-		[100, 80, 57, 255], // rgb(100, 80, 57)
-		[82, 74, 50, 255], // rgb(82, 74, 50)
-		[69, 63, 44, 255], // rgb(69, 63, 44)
+		[136, 112, 84, 255], // rgb(136, 112, 84)
+		[131, 111, 81, 255], // rgb(131, 111, 81)
+		[116, 101, 73, 255], // rgb(116, 101, 73)
 	],
-	density: 600,
-	interactsWithHoverText: ["↔️"],
+	density: 200,
+	interactsWithHoverText: ["☁️"],
 	matterType: "Slushy"
 });
 
@@ -37,18 +37,31 @@ corelib.elements.registerElement({
 		[35, 35, 35, 150], // rgb(35, 35, 35)
 	],
 	density: 30,
-	interactsWithHoverText: ["🫧"],
+	interactsWithHoverText: ["💧"],
 	matterType: "Gas",
 	addToFilterList: false,
+});
+
+corelib.elements.registerElement({
+	id: "CompressedWetSand",
+	name: "Compressed Wet Sand",
+	colors: [
+		[76, 62, 44, 255], // rgb(76, 62, 44)
+		[69, 61, 47, 255], // rgb(69, 61, 47)
+		[64, 60, 43, 255], // rgb(64, 60, 43)
+	],
+	density: 200,
+	interactsWithHoverText: ["↔️"],
+	matterType: "Slushy"
 });
 
 corelib.elements.registerElement({
 	id: "CompressedGold",
 	name: "Compressed Gold",
 	colors: [
-		[247, 244, 204, 255], // rgb(247, 246, 230)
-		[255, 254, 199, 255], // rgb(248, 247, 170)
-		[233, 226, 140, 255], // rgb(248, 241, 169)
+		[247, 246, 230, 255], // rgb(247, 246, 230)
+		[255, 254, 218, 255], // rgb(255, 254, 218)
+		[244, 239, 186, 255], // rgb(244, 239, 186)
 	],
 	density: 350,
 	interactsWithHoverText: ["🚫"],
@@ -64,7 +77,7 @@ corelib.elements.registerElement({
 		[162, 205, 232, 255], // rgb(162, 205, 232)
 		[152, 215, 255, 255], // rgb(152, 215, 255)
 	],
-	density: 400,
+	density: 150,
 	interactsWithHoverText: ["🌋"],
 	matterType: "Solid"
 });
@@ -77,7 +90,7 @@ corelib.elements.registerElement({
 		[47, 57, 62, 255], // rgb(47, 57, 62)
 		[27, 33, 37, 255], // rgb(27, 33, 37)
 	],
-	density: 500,
+	density: 250,
 	interactsWithHoverText: ["⬇️"],
 	matterType: "Slushy"
 });
@@ -90,7 +103,7 @@ corelib.elements.registerElement({
 		[138, 235, 118, 255], // rgb(138, 235, 118)
 		[133, 239, 112, 255], // rgb(133, 239, 112)
 	],
-	density: 450,
+	density: 200,
 	interactsWithHoverText: ["💧"],
 	matterType: "Solid"
 });
@@ -103,11 +116,10 @@ corelib.elements.registerElement({
 		[74, 121, 65, 255], // rgb(74, 121, 65)
 		[66, 104, 59, 255], // rgb(76, 116, 69)
 	],
-	density: 550,
+	density: 250,
 	interactsWithHoverText: ["🚫"],
 	matterType: "Solid"
 });
-
 
 corelib.blocks.register({
 	sourceMod: "industrytesting",
@@ -147,11 +159,30 @@ corelib.blocks.register({
 	tickInterval: 100
 });
 
+corelib.blocks.register({
+	sourceMod: "industrytesting",
+	id: "decompressor",
+	name: "Decompressor",
+	description: "Unbinds inter molecular bonds to allow materials back to their base state.",
+	imagePath: "assets/decompressor",
+	shape: [
+		[3, 3, 3, 3],
+		[0, 3, 3, 0],
+		[0, 3, 3, 0],
+		[0, 0, 0, 0],
+	],
+	angles: [0],
+	singleBuild: true,
+	hasConfigMenu: false,
+	unlockedByDefault: true,
+	tickInterval: 100
+});
+
 corelib.recipes.registerShakerAllows("CompressedGold");
 corelib.recipes.registerShakerAllows("Gloom");
 
 corelib.recipes.registerShakerRecipe({
-	input: "CompressedSand",
+	input: "CompressedWetSand",
 	outputAbove: [
 		["CompressedSlag", 1]
 	],
@@ -160,6 +191,14 @@ corelib.recipes.registerShakerRecipe({
 		["Gold", 1.0],
 		["Gloom", 0.1]
 	],
+});
+
+corelib.recipes.registerBasicRecipe({
+	inputTop: "CompressedSand",
+	inputBottom: "Steam",
+	outputTop: "CompressedWetSand",
+	outputBottom: "CompressedWetSand",
+	bothWays: true
 });
 
 corelib.recipes.registerBasicRecipe({
